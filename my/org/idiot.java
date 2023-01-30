@@ -88,7 +88,7 @@ public class idiot {
 	    static final String DB_URL = "jdbc:postgresql://localhost:5432/postgres";
 	    static final String USER = "postgres";
 	    static final String PASS = "1234";
-	    private static String File_Directory = "/home/red1/Documents/FactAcctReport.xls"; 
+	    private static String File_Directory = "C:\\Users\\60133\\Downloads\\dubizzle.xls"; 
 		Timestamp DateFrom = null;
 		Timestamp DateTo = null;
 		private int AD_Org_ID = 0;
@@ -202,7 +202,7 @@ static void doPDF() throws IOException, InterruptedException{
         Document doc = new Document(pdfDoc,PageSize.A3.rotate());
         PdfFont f = PdfFontFactory.createFont(FONT, PdfEncodings.IDENTITY_H);
   	    int lastrow = pshit.getLastRowNum();
-  	    HSSFRow row = pshit.getRow(11);
+  	    HSSFRow row = pshit.getRow(1);
   	    int lastcol = row.getLastCellNum();
   	    int hidden = 0;
   	    for (int i=0;i<lastcol;i++) {
