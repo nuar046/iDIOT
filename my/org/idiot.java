@@ -1278,7 +1278,7 @@ private static StringBuilder makeFullSQLStatement(HSSFSheet prsheet) {
 		{
 			// ############ FORM FULL SQL AND REPLACE #1,#2,.. WITH PARAMETERS					 
 			fullSQL = selectJoinWhereSQL(fullSQL, SELECT, TABLE, JOIN, WHERE); 
-			lastrowread = rowPr.getRowNum() + 1;
+			lastrowread = rowPr.getRowNum() + 1; //SET THE NEXT ROW FOR TO BE READ
 			if (!rowIteratePr.hasNext())
 				gotSQL=false; //you run out of SQL lines in Process Sheet, so don't come back ! :)
 			return fullSQL;
