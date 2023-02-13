@@ -35,6 +35,7 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.ConditionType;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -85,9 +86,9 @@ import com.itextpdf.layout.properties.UnitValue;
  * and ahmad.anwar.ibrahim@gmail.com and contributors
  */
 public class idiot {
-	    static final String DB_URL = "jdbc:postgresql://localhost:5432/postgres";
-	    static final String USER = "postgres";
-	    static final String PASS = "1234";
+	    static String DB_URL = null;
+	    static String USER = null;
+	    static String PASS = null;
 	    private static String File_Directory = "C:\\Users\\60133\\Downloads\\dubizzle.xls"; 
 		Timestamp DateFrom = null;
 		Timestamp DateTo = null;
@@ -112,7 +113,8 @@ public class idiot {
 		static String to = "";
 		static boolean gotSQL = true;
         static String path = FilenameUtils.getFullPath(File_Directory);
-		static HSSFSheet outputsheet = null;
+        static HSSFSheet configsheet = null;
+        static HSSFSheet outputsheet = null;
 		static HSSFSheet inputsheet = null;
 		static HSSFSheet processsheet = null; 
 		static boolean crosstab;   
@@ -138,13 +140,12 @@ public static void main(String[] args) throws AlsCustomException, SQLException, 
 			clean(file); //clean up write and close back
 			
 			workbook.setForceFormulaRecalculation(true); 
-
+			configsheet = workbook.getSheet("Config");
 			inputsheet = workbook.getSheet("Input");
 			processsheet = workbook.getSheet("Process"); 
 			outputsheet = workbook.getSheet("Output");
-			
+			setConfig(configsheet);			
 			putImage(inputsheet,outputsheet);
-			
 			setAddress(inputsheet,processsheet,outputsheet); 
 			//
 			while (gotSQL) { //there is a running tracker lastrowread / lastrowwrite
@@ -185,6 +186,21 @@ public static void main(String[] args) throws AlsCustomException, SQLException, 
 			e.printStackTrace();
 		} 
 	}
+
+private static void setConfig(HSSFSheet configsheet) {
+
+    Row row = configsheet.getRow(1);
+    Cell cell = row.getCell(1);
+    DB_URL = cell.getStringCellValue();
+    row = configsheet.getRow(2);
+    cell = row.getCell(1);
+    USER = cell.getStringCellValue();
+    row = configsheet.getRow(3);
+    cell = row.getCell(1);
+    Double n = cell.getNumericCellValue(); 
+    Integer temppass = n.intValue();
+    PASS = temppass.toString();
+}
 
 /**
  * 
@@ -363,7 +379,8 @@ static void doPDF() throws IOException, InterruptedException{
 		    		HSSFConditionalFormattingRule rule = cf.getRule(0);
 		    		if (rule==null)
 		    			return false;
-		    	     if (rule.getConditionType().FORMULA != null) {
+		    	     rule.getConditionType();
+					if (ConditionType.FORMULA != null) {
 		    	    	 String[] split = rule.getFormula1().split("=");
 		    	    	 char ch =  split[0].charAt(split[0].length()-1);
 		    	    	 CellReference ref = new CellReference(cell);
@@ -457,7 +474,7 @@ private static void paint(HSSFSheet prsheet, HSSFSheet outsheet) throws AlsCusto
 			   } else {
 				   outcell.setCellValue(prValue.getStringCellValue());
 			   }
-			//outcell.setCellStyle(prValue.getCellStyle());
+			outcell.setCellStyle(prValue.getCellStyle());
 			
 			//get next value writing - 
 			//there is RIGHT AND DOWN direction to display subsequent records
@@ -1256,6 +1273,17 @@ private static StringBuilder makeFullSQLStatement(HSSFSheet prsheet) {
 				crosstab = true;
 			WHERE = new StringBuilder (rowPr.getCell(5).toString());
 		}
+		
+		if(SELECT != null && TABLE != null && JOIN != null&& WHERE != null) 
+		{
+			// ############ FORM FULL SQL AND REPLACE #1,#2,.. WITH PARAMETERS					 
+			fullSQL = selectJoinWhereSQL(fullSQL, SELECT, TABLE, JOIN, WHERE); 
+			lastrowread = rowPr.getRowNum() + 1;
+			if (!rowIteratePr.hasNext())
+				gotSQL=false; //you run out of SQL lines in Process Sheet, so don't come back ! :)
+			return fullSQL;
+		}
+		
 		if (!gothruall)
 			if (TABLE.toString().endsWith(" a")) {
 				gothruall=true;
